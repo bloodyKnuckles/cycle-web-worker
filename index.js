@@ -1,6 +1,7 @@
 console.log('main init')
 
-var worker = new Worker("./otherb.js")
+//var worker = new Worker("./otherb.js")
+var worker = new Worker("./dist/main.js")
 worker.addEventListener('message', function (evt) {
   //console.log('i got: ', evt.data)
   evt.data.forEach(function (cmd) {
