@@ -1,6 +1,6 @@
 import xs from 'xstream';
 import Cycle from '@cycle/xstream-run';
-import {div, button, p} from '@cycle/dom'; //, makeHTMLDriver} from '@cycle/dom';
+import {div, h2, span, button} from '@cycle/dom'; //, makeHTMLDriver} from '@cycle/dom';
 import {makeWWDriver} from './makeWWDriver';
 
 function main(sources) {
@@ -9,13 +9,14 @@ function main(sources) {
     sources.DOM.select('.increment').events('click').map(ev => +1)
   );
   let count$ = action$.fold((x,y) => x + y, 0);*/
-  let count$ = sources.WW.map(x => 1).fold((x,y) => x + y, 0);
+  let count$ = sources.WW.select('.down').map(x => 1).fold((x,y) => x + y, 0);
   return {
     WW: count$.map(count => {
+console.log('cc',count)
         return div([
-          button('.decrement', 'Decrement'),
-          button('.increment', 'Increment'),
-          p('Counter: ' + count)
+          h2('Hello ',[span('#count', count || '0')]),
+          button('#down', 'down'),
+          button('#up', 'up'),
         ])
       })
   };
