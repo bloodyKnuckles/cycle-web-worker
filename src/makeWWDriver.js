@@ -1,4 +1,5 @@
 import xs from 'xstream'
+import sh from 'snabbdom/h'
 import dp from 'dffptch'
 
 self.addEventListener('message', function (evt) {
@@ -24,20 +25,70 @@ self.addEventListener('message', function (evt) {
 function makeWWDriver (container, options) {
   self.postMessage([{'cmd': 'init', 'rootnode': container}])
   if (!options) { options = {}; }
+  let domContainer = sh('div')
   function wWDriver (vtree$) {
-    vtree$.addListener({
+console.log('acc2')
+    /*vtree$.addListener({
       next: function (vtree) {
-console.log('dp',dp.diff(vtree, vtree))
+//console.log('dp',dp.diff(vtree, vtree))
         self.postMessage([{'cmd': 'patch', 'patch': vtree}])
       },
       error: function (err) { console.log(err); },
       complete: function () { console.log('complete'); }
-    });
+    });*/
+
+    let rootElem$ = renderRawRootElem$(vtree$, domContainer)
+      .startWith(domContainer)
+      //.replay(null, 1)
+    //let disposable = rootElem$.connect()
+
     return {
-      select: selector => xs.periodic(1000).take(5),
-      events: xs.periodic(1000).take(5)
+      observable: rootElem$,
+      namespace: [],
+      select: makeElementSelector(rootElem$),
+      events: makeEventsSelector(rootElem$, [])
     }
   }
   return wWDriver;
 }
 exports.makeWWDriver = makeWWDriver;
+
+function renderRawRootElem$(vtree$, domContainer) {
+console.log('acc3')
+  return vtree$
+    .startWith(domContainer)
+    .map(vtree => {
+if ( vtree.children && vtree.children[0] && vtree.children[0].children && vtree.children[0].children[0] ) {
+  console.log('cc',vtree.children[0].children[0].text)
+}
+else { console.log('cc') }
+      self.postMessage([{'cmd': 'render', 'vtree': vtree}])
+      return vtree
+    })
+}
+
+function makeEventsSelector(rootElem$, namespace) {
+  return function events (eventname, options = {}) {
+    self.postMessage([{'cmd': 'msg', 'msg': 'hey there'}])
+    //return xs.periodic(1000).take(5)
+    return rootElem$
+  }
+}
+
+function makeElementSelector(rootElem$) {
+  return function select (selector) {
+    const namespace = this.namespace
+    const trimmedSelector = selector.trim()
+    const childnamespace = trimmedSelector === `:root` ?
+      namespace :
+      namespace.concat(trimmedSelector)
+
+    return {
+      observable: rootElem$,
+      namespace: childnamespace,
+      select: makeElementSelector(rootElem$),
+      events: makeEventsSelector(rootElem$, childnamespace)
+    }
+  }
+}
+

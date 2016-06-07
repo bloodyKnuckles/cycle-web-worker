@@ -11,21 +11,19 @@ var worker = new Worker('./dist/main.js')
 worker.addEventListener('message', function (evt) {
   evt.data.forEach(function (cmd) {
     switch ( cmd.cmd ) {
+      case 'msg': console.log(cmd.msg); break
       case 'event': workerHandler(cmd.event); break
       case 'init':
-        console.log('rn',cmd.rootnode)
         rootnode = document.querySelector(cmd.rootnode)
         rootnode = patch(rootnode, sh('div', '')) //sv(rootnode))
-console.log('rna',rootnode)
         worker.postMessage({
           cmd: 'init',
           absurl: location.origin + location.pathname,
         })
         break;
-      case 'patch':
+      case 'render':
         window.requestAnimationFrame(function () {
-console.log('nn',cmd.patch)
-          patch(rootnode, cmd.patch)
+          patch(rootnode, cmd.vtree)
         })
 
     }

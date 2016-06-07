@@ -9,12 +9,22 @@ function main(sources) {
     sources.DOM.select('.increment').events('click').map(ev => +1)
   );
   let count$ = action$.fold((x,y) => x + y, 0);*/
-  let count$ = sources.WW.select('.down').map(x => 1).fold((x,y) => x + y, 0);
+  let count$ = sources.WW.select('.down')
+    .events('click')
+    .map(x => {
+      console.log('x', x);
+      return 1
+    })
+    .fold((x,y) => {
+      let ret = x + y;
+      console.log('acc',x, 'nxt',y, 'ret',ret);
+      return ret
+    }, 0);
   return {
     WW: count$.map(count => {
-console.log('cc',count)
+console.log('acc1')
         return div([
-          h2('Hello ',[span('#count', count || '0')]),
+          h2('Hello ',[span('#count', `${count}`)]),
           button('#down', 'down'),
           button('#up', 'up'),
         ])
