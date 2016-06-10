@@ -1,10 +1,7 @@
 import xs from 'xstream'
-import sh from 'snabbdom/h'
-import dp from 'dffptch'
 
 self.addEventListener('message', function (evt) {
   var data = evt.data
-
   switch ( data.cmd ) {
     case 'echo': self.postMessage({cmd: 'echo', msg: data}); break
     case 'init':
@@ -22,73 +19,68 @@ self.addEventListener('message', function (evt) {
   } // end switch
 })
 
-function makeWWDriver (container, options) {
+
+
+function makeWWDriver (container) {
   self.postMessage([{'cmd': 'init', 'rootnode': container}])
-  if (!options) { options = {}; }
-  let domContainer = sh('div')
-  function wWDriver (vtree$) {
-console.log('acc2')
-    /*vtree$.addListener({
-      next: function (vtree) {
-//console.log('dp',dp.diff(vtree, vtree))
-        self.postMessage([{'cmd': 'patch', 'patch': vtree}])
+
+  return function wwDriver (outgoing$) {
+
+console.log('WW driver init')
+
+    outgoing$.addListener({
+      next: vtree => {
+
+// render here
+
+        self.postMessage([{'cmd': 'render', 'vtree': vtree}])
+
       },
-      error: function (err) { console.log(err); },
-      complete: function () { console.log('complete'); }
-    });*/
-
-    let rootElem$ = renderRawRootElem$(vtree$, domContainer)
-      .startWith(domContainer)
-      //.replay(null, 1)
-    //let disposable = rootElem$.connect()
-
+      error: err => console.log(`err: ${err}`),
+      complete: () => console.log('completed')
+    });
     return {
-      observable: rootElem$,
-      namespace: [],
-      select: makeElementSelector(rootElem$),
-      events: makeEventsSelector(rootElem$, [])
+      select: (selector) => {
+        return {
+          events: (event) => {
+
+// add event listener here
+
+            // return event$
+            return xs.create({
+              next: null,
+              start: function (listener) {
+                self.postMessage([{
+                  'cmd': 'event',
+                  'event': {
+                    'element': selector, 'event': event, 'response': 'target.value'
+                  }
+                }])
+                this.next = function next(evt) {
+                  if (
+                    'event' === evt.data.cmd &&
+                    selector === evt.data.event.element &&
+                    event === evt.data.event.event
+                  ) {
+                    listener.next(evt.data);
+                  }
+                }
+                self.addEventListener('message', this.next)
+              },
+              stop: function () {
+                /*document.querySelector(selector).removeEventListener(
+                  event,
+                  this.next
+                )*/
+              }
+            })
+              .map(x => 1)
+              .map(x => {return {target: {value: 1}}})
+          }
+        }
+      }
     }
   }
-  return wWDriver;
 }
+
 exports.makeWWDriver = makeWWDriver;
-
-function renderRawRootElem$(vtree$, domContainer) {
-console.log('acc3')
-  return vtree$
-    .startWith(domContainer)
-    .map(vtree => {
-if ( vtree.children && vtree.children[0] && vtree.children[0].children && vtree.children[0].children[0] ) {
-  console.log('cc',vtree.children[0].children[0].text)
-}
-else { console.log('cc') }
-      self.postMessage([{'cmd': 'render', 'vtree': vtree}])
-      return vtree
-    })
-}
-
-function makeEventsSelector(rootElem$, namespace) {
-  return function events (eventname, options = {}) {
-    self.postMessage([{'cmd': 'msg', 'msg': 'hey there'}])
-    //return xs.periodic(1000).take(5)
-    return rootElem$
-  }
-}
-
-function makeElementSelector(rootElem$) {
-  return function select (selector) {
-    const namespace = this.namespace
-    const trimmedSelector = selector.trim()
-    const childnamespace = trimmedSelector === `:root` ?
-      namespace :
-      namespace.concat(trimmedSelector)
-
-    return {
-      observable: rootElem$,
-      namespace: childnamespace,
-      select: makeElementSelector(rootElem$),
-      events: makeEventsSelector(rootElem$, childnamespace)
-    }
-  }
-}
-
