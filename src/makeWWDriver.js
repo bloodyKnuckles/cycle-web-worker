@@ -74,8 +74,7 @@ console.log('WW driver init')
                 )*/
               }
             })
-              .map(x => 1)
-              .map(x => {return {target: {value: 1}}})
+              .map(evt => evt.event)
           }
         }
       }
