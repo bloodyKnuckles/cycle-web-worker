@@ -1,6 +1,5 @@
 import sd from 'snabbdom'
 import sh from 'snabbdom/h'
-import sv from 'snabbdom-virtualize/nodes' 
 var patch = sd.init([])
 
 console.log('index init')
