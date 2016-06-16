@@ -3,19 +3,7 @@ import xs from 'xstream'
 self.addEventListener('message', function (evt) {
   var data = evt.data
   switch ( data.cmd ) {
-    case 'echo': self.postMessage({cmd: 'echo', msg: data}); break
-    case 'init':
-      console.log('worker init')
-      break
-
-    /*default:
-      rm = app.match(data.url)
-      rm.fn(data, rm).then(function (pageinfo) {
-        getTemplate(pageinfo.templates).then(function (vdom) {
-          render(vdom, pageinfo.content)
-        })
-      })*/
-
+    case 'init': console.log('worker init'); break
   } // end switch
 })
 
@@ -24,27 +12,25 @@ self.addEventListener('message', function (evt) {
 function makeWWDriver (container) {
   self.postMessage([{'cmd': 'init', 'rootnode': container}])
 
-  return function wwDriver (outgoing$) {
+  return function wwDriver (vtree$) {
 
-console.log('WW driver init')
+    console.log('WW driver init')
 
-    outgoing$.addListener({
+    vtree$.addListener({
       next: vtree => {
 
-// render here
-
+        // render here
         self.postMessage([{'cmd': 'render', 'vtree': vtree}])
 
       },
       error: err => console.log(`err: ${err}`),
       complete: () => console.log('completed')
     });
+
     return {
       select: (selector) => {
         return {
-          events: (event) => {
-
-// add event listener here
+          events: (eventname, response = 'target.value') => {
 
             // return event$
             return xs.create({
@@ -53,16 +39,16 @@ console.log('WW driver init')
                 self.postMessage([{
                   'cmd': 'event',
                   'event': {
-                    'element': selector, 'event': event, 'response': 'target.value'
+                    'element': selector, 'event': eventname, 'response': response
                   }
                 }])
                 this.next = function next(evt) {
                   if (
                     'event' === evt.data.cmd &&
                     selector === evt.data.event.element &&
-                    event === evt.data.event.event
+                    eventname === evt.data.event.event
                   ) {
-                    listener.next(evt.data);
+                    listener.next(evt.data.event);
                   }
                 }
                 self.addEventListener('message', this.next)
@@ -73,13 +59,12 @@ console.log('WW driver init')
                   this.next
                 )*/
               }
-            })
-              .map(evt => evt.event)
-          }
+            }) // end event$
+          } // end events
         }
-      }
+      } // end select
     }
-  }
+  } // end wwDriver
 }
 
 exports.makeWWDriver = makeWWDriver;
