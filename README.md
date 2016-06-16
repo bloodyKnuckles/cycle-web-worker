@@ -15,6 +15,8 @@ Window Context
   - Event Bridge
   - window.requestAnimationFrame
 
+[Demo](http://bloodyknuckles.neocities.org/cycle-web-worker/)
+
 ### license
 
 MIT
