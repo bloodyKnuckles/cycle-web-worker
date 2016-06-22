@@ -1,5 +1,4 @@
 import sd from 'snabbdom'
-import sh from 'snabbdom/h'
 var patch = sd.init([])
 
 console.log('index init')
