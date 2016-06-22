@@ -7,8 +7,6 @@ self.addEventListener('message', function (evt) {
   } // end switch
 })
 
-
-
 function makeWWDriver (container) {
   self.postMessage([{'cmd': 'init', 'rootnode': container}])
 
