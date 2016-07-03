@@ -1,4 +1,5 @@
 import sd from 'snabbdom'
+import eventBridge from 'worker-event-bridge/main'
 var patch = sd.init([])
 
 console.log('index init')
@@ -17,7 +18,7 @@ worker.addEventListener('message', function (evt) {
           absurl: location.origin + location.pathname,
         })
         break;
-      case 'event': eventBridge(data.event); break
+      case 'event': eventBridge(worker, data.event); break
       case 'render':
         if ( rootnode instanceof HTMLElement ) {
           rootnode = patch(rootnode, data.vtree)
@@ -31,20 +32,4 @@ worker.addEventListener('message', function (evt) {
     }
   })
 }, false)
-
-function eventBridge (evtinfo) {
-  document.querySelector(evtinfo.element)
-    .addEventListener(evtinfo.event, function evtFn (evt) {
-      worker.postMessage({
-        cmd: 'event',
-        'event': {
-          'element': evtinfo.element,
-          'event': evtinfo.event,
-          // return specified property, e.g., 'target.value'
-          'response': evtinfo.response.split('.')
-            .reduce(function (obj, ii) { return obj[ii] }, evt)
-        }
-      })
-    }, false);
-}
 

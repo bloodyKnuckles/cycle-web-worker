@@ -1,4 +1,5 @@
 import xs from 'xstream'
+import eventBridge from 'worker-event-bridge/worker'
 
 self.addEventListener('message', function (evt) {
   var data = evt.data
@@ -34,20 +35,17 @@ function makeWWDriver (container) {
             return xs.create({
               next: null,
               start: function (listener) {
-                self.postMessage([{
-                  'cmd': 'event',
-                  'event': {
-                    'element': selector, 'event': eventname, 'response': response
-                  }
-                }])
+
+                eventBridge.send(selector, eventname, response)
+
                 this.next = function next(evt) {
-                  if (
-                    'event' === evt.data.cmd &&
-                    selector === evt.data.event.element &&
-                    eventname === evt.data.event.event
-                  ) {
-                    listener.next(evt.data.event);
+
+                  Function.prototype.context = function(context)  {
+                    var action = this;
+                    return function() { action.apply(context, arguments); };
                   }
+                  eventBridge.receive(evt, selector, eventname, listener.next.context(listener))
+
                 }
                 self.addEventListener('message', this.next)
               },
