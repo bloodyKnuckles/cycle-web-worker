@@ -40,7 +40,7 @@ function makeWWDriver (container) {
                   var action = this;
                   return function() { action.apply(context, arguments); };
                 }
-                eventBridge(selector, eventname, 'target.value', listener.next.context(listener))
+                eventBridge(selector, eventname, response, listener.next.context(listener))
 
               },
               stop: function () {
