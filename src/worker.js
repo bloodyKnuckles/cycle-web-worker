@@ -10,7 +10,7 @@ function main(sources) {
   let action$ = xs.merge(
     sources.WW.select('button#down').events('click').map(evt => { return {'count': -1} }),
     sources.WW.select('button#up').events('click').map(evt => { return {'count': 1} }),
-    sources.WW.select('#in').events('keyup').map(evt => { return {'txt': evt.response} })
+    sources.WW.select('#in').events('keyup').map(val => { return {'txt': val} })
   );
   let output$ = action$.fold((acc, val) => {
       acc.count = val.count? acc.count + val.count: acc.count

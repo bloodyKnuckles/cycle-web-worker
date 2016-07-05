@@ -6,7 +6,7 @@ console.log('index init')
 
 var rootnode
 
-var worker = new Worker('./dist/main.js')
+var worker = new Worker('./dist/worker.js')
 
 worker.addEventListener('message', function (evt) {
   evt.data.forEach(function (data) {
@@ -18,7 +18,7 @@ worker.addEventListener('message', function (evt) {
           absurl: location.origin + location.pathname,
         })
         break;
-      case 'event': eventBridge(worker, data.event); break
+      //case 'event': eventBridge(worker, data.event); break
       case 'render':
         if ( rootnode instanceof HTMLElement ) {
           rootnode = patch(rootnode, data.vtree)
@@ -33,3 +33,4 @@ worker.addEventListener('message', function (evt) {
   })
 }, false)
 
+eventBridge(worker)

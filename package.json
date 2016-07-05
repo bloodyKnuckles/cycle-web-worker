@@ -7,7 +7,7 @@
     "@cycle/dom": "10.0.0-rc33",
     "@cycle/xstream-run": "3.0.1",
     "snabbdom": "^0.5.0",
-    "worker-event-bridge": "^0.1.0",
+    "worker-event-bridge": "^0.1.2",
     "xstream": "5.0.5"
   },
   "devDependencies": {
@@ -19,7 +19,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "buildindex": "browserify src/index.js -t babelify --outfile dist/index.js",
-    "buildmain": "browserify src/main.js  -t babelify --outfile dist/main.js",
-    "build": "npm run buildindex && npm run buildmain"
+    "buildworker": "browserify src/worker.js  -t babelify --outfile dist/worker.js",
+    "build": "npm run buildindex && npm run buildworker"
   }
 }

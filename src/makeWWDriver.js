@@ -36,18 +36,12 @@ function makeWWDriver (container) {
               next: null,
               start: function (listener) {
 
-                eventBridge.send(selector, eventname, response)
-
-                this.next = function next(evt) {
-
-                  Function.prototype.context = function(context)  {
-                    var action = this;
-                    return function() { action.apply(context, arguments); };
-                  }
-                  eventBridge.receive(evt, selector, eventname, listener.next.context(listener))
-
+                Function.prototype.context = function(context)  {
+                  var action = this;
+                  return function() { action.apply(context, arguments); };
                 }
-                self.addEventListener('message', this.next)
+                eventBridge(selector, eventname, 'target.value', listener.next.context(listener))
+
               },
               stop: function () {
                 /*document.querySelector(selector).removeEventListener(
