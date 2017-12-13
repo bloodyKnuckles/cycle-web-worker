@@ -1,6 +1,6 @@
 {
   "name": "cycle-web-worker",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "author": "Jay Scott ANDERSON",
   "license": "MIT",
   "dependencies": {
@@ -21,5 +21,19 @@
     "buildindex": "browserify src/index.js -t babelify --outfile dist/index.js",
     "buildworker": "browserify src/worker.js  -t babelify --outfile dist/worker.js",
     "build": "npm run buildindex && npm run buildworker"
-  }
+  },
+  "description": "Under development.",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bloodyKnuckles/cycle-web-worker.git"
+  },
+  "keywords": [
+    "cyclejs",
+    "web-worker"
+  ],
+  "bugs": {
+    "url": "https://github.com/bloodyKnuckles/cycle-web-worker/issues"
+  },
+  "homepage": "https://github.com/bloodyKnuckles/cycle-web-worker#readme"
 }
